@@ -29,8 +29,14 @@ class ChoroplethMap {
     let vis = this;
 
     // To-do: Add color scale
+    vis.colourScale = d3.scaleQuantile()
+      .domain([vis.min, vis.max])
+      .range(d3.schemeBlues[9]);
+
+    vis.colourValue = d => vis.yearPopulation[d.id];
 
     // To-do: Select data for specific year (could be done in task1.js too)
+    vis.yearPopulation = vis.population.filter(d => d.year == selectedYear)[0];
 
     vis.render();
   }
@@ -50,8 +56,12 @@ class ChoroplethMap {
       .transition()
         .attr('fill', d => {
           // To-do: Change fill to color code each province by its population
-          return '#fff';
-        });
+          console.log(d.id + " " + vis.yearPopulation[d.id]);
+
+          return vis.colourScale(vis.colourValue(d));
+        })
+        .append('title')
+          .text(d => d.id)
 
     // To-do: Add labels for each province with the population value
   }
