@@ -39,3 +39,43 @@ $("#year-slider").on("input", function() {
   elem.replaceChild(yrText, elem.firstChild);
   choroplethMap.update();
 });
+
+let playBtn = document.getElementById('play-control');
+
+let timer;
+let isPlaying = false;
+
+let controlAnimation = () => {
+  let btn = document.getElementById('play-control');
+  if(!isPlaying) {
+    let pauseText = document.createTextNode('Pause');
+    btn.replaceChild(pauseText, btn.firstChild);
+    isPlaying = true;
+    timer = setInterval(step, 300)
+  } else {
+    clearInterval(timer);
+    let playText = document.createTextNode('Play');
+    btn.replaceChild(playText, btn.firstChild);
+    isPlaying = false;
+  }
+}
+
+let step = () => {
+  choroplethMap.update(selectedYear);
+  selectedYear += 1;
+  if (selectedYear > 2019) {
+    isPlaying = false;
+    selectedYear = 1991;
+    clearInterval(timer);
+    let btn = document.getElementById('play-control');
+    let playText = document.createTextNode('Play');
+    btn.replaceChild(playText, btn.firstChild);
+  } else {
+    let slider = document.getElementById('year-slider');
+    slider.value = selectedYear;
+    let yrText = document.createTextNode(selectedYear);
+    let elem = document.getElementById("year-selection");
+    elem.replaceChild(yrText, elem.firstChild);
+  }
+}
+playBtn.addEventListener('click', controlAnimation);

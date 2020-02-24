@@ -56,8 +56,6 @@ class ChoroplethMap {
       .transition()
         .attr('fill', d => {
           // To-do: Change fill to color code each province by its population
-          console.log(d.id + " " + vis.yearPopulation[d.id]);
-
           return vis.colourScale(vis.colourValue(d));
         })
 
