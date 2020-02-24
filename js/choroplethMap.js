@@ -60,9 +60,14 @@ class ChoroplethMap {
 
           return vis.colourScale(vis.colourValue(d));
         })
-        .append('title')
-          .text(d => d.id)
 
     // To-do: Add labels for each province with the population value
+    let labels = vis.chart.selectAll('.pop-label').data(topojson.feature(vis.canada_geo, vis.canada_geo.objects.provinces).features);
+    labels.enter().append('text')
+        .merge(labels)
+        .attr('class', 'pop-label')
+        .attr('transform', d => `translate(${vis.path.centroid(d)})`)
+        .attr('text-anchor', 'middle')
+        .text(d => d3.format('.2s')(vis.yearPopulation[d.id]));
   }
 }

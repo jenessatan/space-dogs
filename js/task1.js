@@ -1,7 +1,7 @@
 
 // Initialize chart
 let choroplethMap = new ChoroplethMap({ parentElement: '#map' });
-let selectedYear = 2019;
+let selectedYear = 1991;
 
 // Load data
 Promise.all([

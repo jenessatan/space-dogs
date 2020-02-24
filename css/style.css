@@ -9,3 +9,8 @@ html {
 .geo-path {
   stroke: #ddd;
 }
+
+.pop-label {
+  font-size: 10pt;
+  font-weight: bold
+}
