@@ -3,8 +3,8 @@ class Histogram {
     constructor(_config) {
       this.config = {
         parentElement: _config.parentElement,
-        containerWidth: _config.containerWidth || 1000,
-        containerHeight: _config.containerHeight || 600,
+        containerWidth: _config.containerWidth || 800,
+        containerHeight: _config.containerHeight || 300,
       }
       this.config.margin = _config.margin || { top: 10, bottom: 25, right: 10, left: 30 }      
       this.initVis();
@@ -19,7 +19,7 @@ class Histogram {
         vis.svg = d3.select(vis.config.parentElement);
     
         vis.chart = vis.svg.append('g')
-            .attr('transform', `translate(${vis.config.margin.left}, -200)`);
+            .attr('transform', `translate(${vis.config.margin.left}, ${vis.config.margin.top})`);
         
         // initialize x axis
         vis.xScale = d3.scaleTime()
@@ -30,7 +30,12 @@ class Histogram {
 
         vis.colour = d3.scaleOrdinal()
             .domain(['safe','part-safe', 'died'])
-            .range(['#34344A','#80475E' ,'#CC5A71'])
+            .range(['#34344A','#80475E' ,'#CC5A71']);
+
+        vis.tooltip = d3.select('#container').append('div')
+            .attr('class', 'tooltip')
+            .style('visibility', 'hidden')
+            .style("position", "absolute")
       }
 
       update() {
@@ -55,8 +60,8 @@ class Histogram {
       }
 
       render() {
-        console.log("render")
-        let vis = this;
+          let vis = this;
+          console.log(vis.tooltip);
 
         // vis.chart.append('g')
         //     .call(d3.axisLeft(vis.yScale));
@@ -75,13 +80,40 @@ class Histogram {
                     return {
                         idx: i,
                         data: val,
-                        radius: 15
+                        radius: 12
                     }
                 }))
                 .enter().append('circle')
                 .attr('cx', 0)
                 .attr('cy', d => -d.idx * 2 * d.radius - d.radius)
                 .attr('r', d => d.radius)
-                .attr('fill', d => vis.colour(d.data.Result))
+                .attr('fill', d => vis.colour(d.data.Outcome))
+                .on('mouseover', vis.mouseover)
+                .on('mouseout', vis.mouseout)
+                .on('mousemove', vis.mousemove)
+      }
+
+      mouseover(d) {
+          let circle = d3.select(this);
+          circle.attr('stroke', 'teal')
+            .attr('stroke-width', 3);
+          let tooltip = d3.select('.tooltip');
+          tooltip
+            .style('visibility', 'visible')
+            .html(`<p><span style='font-weight: bold; color: teal'>Onboard: </span>${d.data.Dogs}</p><p><span style='font-weight: bold; color: teal'>Outcome: </span> ${d.data.Result}</p>`)
+      }
+
+      mousemove(d) {
+          let tooltip = d3.select('.tooltip');
+          tooltip
+            .style("top", (d3.event.pageY-15)+"px")
+            .style("left",(d3.event.pageX+5)+"px")
+      }
+
+      mouseout(d) {
+          let circle = d3.select(this);
+          circle.attr('stroke', 'none');
+          let tooltip = d3.select('.tooltip');
+          tooltip.style('visibility', 'hidden');
       }
 }
