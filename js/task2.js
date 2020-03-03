@@ -1,5 +1,8 @@
 // To-do: task 2
 let histogram = new Histogram({ parentElement: '#flights' });
+let safeIcon = d3.xml('img/spaceship.svg');
+let partSafe = d3.xml('img/spaceship-part-safe.svg');
+let crash = d3.xml('img/spaceship-crash.svg');
 
 d3.csv('data/Flights-Database.csv').then(data => {
     // console.log(data);

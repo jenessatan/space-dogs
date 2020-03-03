@@ -4,7 +4,7 @@ class Histogram {
       this.config = {
         parentElement: _config.parentElement,
         containerWidth: _config.containerWidth || 800,
-        containerHeight: _config.containerHeight || 300,
+        containerHeight: _config.containerHeight || 400,
       }
       this.config.margin = _config.margin || { top: 10, bottom: 25, right: 10, left: 30 }      
       this.initVis();
@@ -74,23 +74,45 @@ class Histogram {
             .data(vis.histData)
             .enter().append('g')
             .attr('class', 'bin-container')
-            .attr("transform", function(d) { return "translate(" + vis.xScale(d.x0) + "," + vis.height + ")"; })
-            .selectAll('circle')
+            .attr("transform", function(d) { return "translate(" + vis.xScale(d.x0) + "," + (vis.height - 45) + ")"; })
+            // .selectAll('circle')
+            //     .data(d => d.map((val, i) => {
+            //         return {
+            //             idx: i,
+            //             data: val,
+            //             radius: 20
+            //         }
+            //     }))
+            //     .enter().append('circle')
+            //     .attr('cx', 0)
+            //     .attr('cy', d => -d.idx * 2 * d.radius - d.radius)
+            //     .attr('r', d => d.radius)
+            //     .attr('fill', d => vis.colour(d.data.Outcome))
+            .selectAll('.icon')
                 .data(d => d.map((val, i) => {
                     return {
-                        idx: i,
-                        data: val,
-                        radius: 12
+                        idx: i, 
+                        data: val
                     }
                 }))
-                .enter().append('circle')
-                .attr('cx', 0)
-                .attr('cy', d => -d.idx * 2 * d.radius - d.radius)
-                .attr('r', d => d.radius)
-                .attr('fill', d => vis.colour(d.data.Outcome))
-                .on('mouseover', vis.mouseover)
-                .on('mouseout', vis.mouseout)
-                .on('mousemove', vis.mousemove)
+                .enter().append('image')
+                .attr('class', 'icon')
+                .attr('xlink:href', d => {
+                    if(d.data.Outcome == 'safe') return 'img/spaceship.svg'
+                    else if (d.data.Outcome == 'part-safe') return 'img/spaceship-part-safe.svg'
+                    else return 'img/spaceship-crash.svg'
+                })
+                .attr('x', -25)
+                .attr('y', d => -d.idx * 45)
+                .attr('height', "50px")
+                .attr('width', '50px')
+                .attr('fill', function (d){
+                    d3.select(this).select('path')
+                        .style('fill', d => vis.colour(d.data.Outcome))
+                })
+                    .on('mouseover', vis.mouseover)
+                    .on('mouseout', vis.mouseout)
+                    .on('mousemove', vis.mousemove)
       }
 
       mouseover(d) {
