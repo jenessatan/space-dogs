@@ -36,7 +36,20 @@ class Histogram {
             .attr('class', 'tooltip')
             .style('visibility', 'hidden')
             .style("position", "absolute")
+        
+        vis.drawLegend();
       }
+
+      drawLegend() {
+          let vis = this;
+        vis.chart.append("circle").attr("cx",200).attr("cy",130).attr("r", 6).style("fill", "steelblue").attr('transform', `translate(${vis.width - 160}, -100)`)
+        vis.chart.append("circle").attr("cx",200).attr("cy",160).attr("r", 6).style("fill", "tomato").attr('transform', `translate(${vis.width - 160}, -110)`)
+        vis.chart.append("text").attr("x", 220).attr("y", 130).text("male").style("font-size", "15px").attr("alignment-baseline","middle").attr('transform', `translate(${vis.width - 160}, -100)`)
+        vis.chart.append("text").attr("x", 220).attr("y", 160).text("female").style("font-size", "15px").attr("alignment-baseline","middle").attr('transform', `translate(${vis.width - 160}, -110)`)
+        vis.chart.append("circle").attr("cx",200).attr("cy",160).attr("r", 6).style("fill", "tomato").attr('transform', `translate(${vis.width - 160}, -110)`)
+        vis.chart.append("text").attr("x", 220).attr("y", 130).text("male").style("font-size", "15px").attr("alignment-baseline","middle").attr('transform', `translate(${vis.width - 160}, -100)`) 
+    }
+
 
       update() {
           let vis = this;
@@ -70,24 +83,34 @@ class Histogram {
             .attr("transform", "translate(0," + vis.height + ")")
             .call(d3.axisBottom(vis.xScale).ticks(17))
 
-        vis.chart.selectAll('.bin-container')
-            .data(vis.histData)
+        let binContainer = vis.chart.selectAll('.bin-container')
+            .data(vis.histData);
+        let binContainerEnter = binContainer
             .enter().append('g')
-            .attr('class', 'bin-container')
-            .attr("transform", function(d) { return "translate(" + vis.xScale(d.x0) + "," + (vis.height - 45) + ")"; })
-            // .selectAll('circle')
-            //     .data(d => d.map((val, i) => {
-            //         return {
-            //             idx: i,
-            //             data: val,
-            //             radius: 20
-            //         }
-            //     }))
-            //     .enter().append('circle')
-            //     .attr('cx', 0)
-            //     .attr('cy', d => -d.idx * 2 * d.radius - d.radius)
-            //     .attr('r', d => d.radius)
-            //     .attr('fill', d => vis.colour(d.data.Outcome))
+            .attr('class', 'bin-container');
+
+        binContainer.merge(binContainerEnter)
+            .attr("transform", function(d) { return "translate(" + vis.xScale(d.x0) + "," + (vis.height - 45) + ")"; });
+                            
+            let circles = binContainer.merge(binContainerEnter)
+            .selectAll('circle')
+                .data(d => d.map((val, i) => {
+                    return {
+                        idx: i,
+                        data: val,
+                        radius: 22.5
+                    }
+                }));
+        let circlesEnter = circles
+                .enter().append('circle');
+        
+        circles.merge(circlesEnter)
+                .attr('cx', 0)
+                .attr('cy', d => -d.idx * 2 * d.radius + 26)
+                .attr('r', d => d.radius)
+                .attr('fill', d => vis.colour(d.data.Outcome))
+
+        let icons = binContainer.merge(binContainerEnter)
             .selectAll('.icon')
                 .data(d => d.map((val, i) => {
                     return {
@@ -95,7 +118,9 @@ class Histogram {
                         data: val
                     }
                 }))
+        let iconsEnter = icons
                 .enter().append('image')
+        icons.merge(iconsEnter)
                 .attr('class', 'icon')
                 .attr('xlink:href', d => {
                     if(d.data.Outcome == 'safe') return 'img/spaceship.svg'
@@ -113,6 +138,8 @@ class Histogram {
                     .on('mouseover', vis.mouseover)
                     .on('mouseout', vis.mouseout)
                     .on('mousemove', vis.mousemove)
+
+            
       }
 
       mouseover(d) {
