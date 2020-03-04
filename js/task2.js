@@ -1,6 +1,14 @@
 // To-do: task 2
 let histogram = new Histogram({ parentElement: '#flights' });
 
+// Promise.all([
+//     d3.csv('data/Flights-Database.csv'),
+//     d3.csv('data/Dogs-Database.csv')
+// ]).then(files => {
+//     let flights = files[0];
+//     let dogs = files[1];
+// })
+
 d3.csv('data/Flights-Database.csv').then(data => {
     // console.log(data);
     let parser = d3.timeParse("%Y-%m-%d");
