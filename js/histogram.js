@@ -29,8 +29,8 @@ class Histogram {
             .range([vis.height, 0]);
 
         vis.colour = d3.scaleOrdinal()
-            .domain(['safe','part-safe', 'died'])
-            .range(['#34344A','#80475E' ,'#CC5A71']);
+            .domain(['unknown', '100', '212', '451', 'orbital'])
+            .range(d3.schemePuBu[7]);
 
         vis.tooltip = d3.select('#container').append('div')
             .attr('class', 'tooltip')
@@ -42,33 +42,91 @@ class Histogram {
 
       drawLegend() {
           let vis = this;
-        vis.chart.append("circle").attr("cx",200).attr("cy",130).attr("r", 6).style("fill", "steelblue").attr('transform', `translate(${vis.width - 160}, -100)`)
-        vis.chart.append("circle").attr("cx",200).attr("cy",160).attr("r", 6).style("fill", "tomato").attr('transform', `translate(${vis.width - 160}, -110)`)
-        vis.chart.append("text").attr("x", 220).attr("y", 130).text("male").style("font-size", "15px").attr("alignment-baseline","middle").attr('transform', `translate(${vis.width - 160}, -100)`)
-        vis.chart.append("text").attr("x", 220).attr("y", 160).text("female").style("font-size", "15px").attr("alignment-baseline","middle").attr('transform', `translate(${vis.width - 160}, -110)`)
-        vis.chart.append("circle").attr("cx",200).attr("cy",160).attr("r", 6).style("fill", "tomato").attr('transform', `translate(${vis.width - 160}, -110)`)
-        vis.chart.append("text").attr("x", 220).attr("y", 130).text("male").style("font-size", "15px").attr("alignment-baseline","middle").attr('transform', `translate(${vis.width - 160}, -100)`) 
+          let legend = d3.select("#legend").append('g');
+          let altLegend = legend.append('g');
+          let altitudes = ['unknown', '100', '212', '451', 'orbital'];
+          let outcomes = ['safe','part-safe', 'died'];
+
+        altLegend.selectAll("alt")
+          .data(altitudes)
+          .enter()
+          .append("circle")
+            .attr("cx", 100)
+            .attr("cy", (d,i) =>  70 + i*40) // 100 is where the first dot appears. 25 is the distance between dots
+            .attr("r", 10)
+            .style("fill", d => vis.colour(d))
+            .style('stroke', 'black')
+        
+        
+        altLegend.selectAll("altlabels")
+            .data(altitudes)
+            .enter()
+            .append("text")
+                .attr("x", 120)
+                .attr("y", (d,i) =>  70 + i*40) // 100 is where the first dot appears. 25 is the distance between dots
+                .style("fill", 'black')
+                .text(d => { 
+                    if(d == 'unknown' || d == 'orbital') return d
+                    else return d + " km"
+                })
+                .attr("text-anchor", "left")
+                .style("alignment-baseline", "middle")
+        altLegend.append("text").attr("x", 90).attr("y", 30).text("Altitude")
+            .style("font-size", "25px")
+            .style("font-weight", "bold")
+            .attr("alignment-baseline","middle")
+
+
+        legend.selectAll('icons')
+            .data(outcomes)
+            .enter()
+            .append('image')
+                .attr('xlink:href', d => {
+                    if(d == 'safe') return 'img/spaceship.svg'
+                    else if (d == 'part-safe') return 'img/spaceship-part-safe.svg'
+                    else return 'img/spaceship-crash.svg'
+                })
+                .attr('x', 500)
+                .attr('y', (d, i) => 50 + i*60)
+                .attr('height', "50px")
+                .attr('width', '50px')
+        legend.selectAll('iconLabel')
+        .data(outcomes)
+        .enter()
+        .append("text")
+        .attr('x', 560)
+        .attr('y', (d, i) => 70 + i*60)
+            .text(d => {
+                if(d == 'safe') return 'recovered safely'
+                else if (d == 'part-safe') return 'recovered but with fatality'
+                else return 'failed with fatality'
+            })
+            .attr("text-anchor", "left")
+            .style("alignment-baseline", "middle")
+        
+        legend.append("text").attr("x", 500).attr("y", 30).text("Mission Outcome")
+            .style("font-size", "25px")
+            .style("font-weight", "bold")
+            .attr("alignment-baseline","middle")
     }
 
 
       update() {
           let vis = this;
-          console.log("update");
-          console.log(vis.data);
+        //   console.log("update");
+        //   console.log(vis.data);
           let yearExtent = d3.extent(vis.data, d => d.Date);
           
           let yearBins = d3.timeYears(d3.timeYear.offset(yearExtent[0], -1), d3.timeYear.offset(yearExtent[1]), 1);
-          console.log(yearBins);
+        //   console.log(yearBins);
           let binByYear = d3.histogram()
             .value(d => d.Date)
             .thresholds(yearBins);
         
          vis.histData = binByYear(vis.data);
          vis.histData[0].x0 = new Date("Jan 01, 1951");
-         console.log(vis.histData);
+        //  console.log(vis.histData);
          vis.xScale.domain(d3.extent(yearBins));
-        //  vis.yScale.domain([0, d3.max(vis.histData, d => d.length)]);
-        //  console.log(vis.yScale.domain());
          vis.render();
       }
 
@@ -76,8 +134,6 @@ class Histogram {
           let vis = this;
           console.log(vis.tooltip);
 
-        // vis.chart.append('g')
-        //     .call(d3.axisLeft(vis.yScale));
         
         vis.chart.append('g')
             .attr("transform", "translate(0," + vis.height + ")")
@@ -108,7 +164,8 @@ class Histogram {
                 .attr('cx', 0)
                 .attr('cy', d => -d.idx * 2 * d.radius + 26)
                 .attr('r', d => d.radius)
-                .attr('fill', d => vis.colour(d.data.Outcome))
+                .attr('fill', d => {
+                    return vis.colour(d.data.Altitude)})
 
         let icons = binContainer.merge(binContainerEnter)
             .selectAll('.icon')
