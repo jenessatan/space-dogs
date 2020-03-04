@@ -1,1 +1,3 @@
 To-do: Cite any external resources and explain exactly what modifications you have made.
+
+I used the [Most Basic Histogram in d3](https://www.d3-graph-gallery.com/graph/histogram_basic.html) as reference for creating the base histogram. I binned the flight data by year to create the histogram. However, instead of using a single line mark to encode the total number of flights in each year, I created a mark for each flight and stacked them vertically. I created a custom glyph, importing the image to use as the mark. The rotation of the glyph encodes the outcome of the mission, while the saturation channel of the glyph background encodes the flight altitude.
