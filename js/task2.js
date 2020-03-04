@@ -1,8 +1,5 @@
 // To-do: task 2
 let histogram = new Histogram({ parentElement: '#flights' });
-let safeIcon = d3.xml('img/spaceship.svg');
-let partSafe = d3.xml('img/spaceship-part-safe.svg');
-let crash = d3.xml('img/spaceship-crash.svg');
 
 d3.csv('data/Flights-Database.csv').then(data => {
     // console.log(data);
@@ -10,12 +7,10 @@ d3.csv('data/Flights-Database.csv').then(data => {
     data.forEach(d => {
         d.Date = parser(d.Date);
         d.Outcome = processResult(d.Result);
+        d.Altitude = processAltitude(d['Altitude (km)']);
     })
-    let altitudes = d3.nest()
-        .key(d => d["Altitude (km)"])
-        .entries(data);
 
-     console.log(altitudes);
+    console.log(data);
 
     histogram.data = data;
     histogram.update();
@@ -29,4 +24,9 @@ let processResult = (str) => {
     } else {
         return 'died'
     }
+}
+
+let processAltitude = (str) => {
+    if(str == 'was to be orbital') return 'unknown'
+    else return str
 }
