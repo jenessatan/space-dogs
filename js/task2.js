@@ -12,6 +12,8 @@ Promise.all([
 
     let dogs = {};
     dogsRaw.forEach(d => {
+        let names = d["Name (Latin)"].split('/');
+        d["Name (Latin)"] = names[0];
         dogs[d["Name (Latin)"]] = {
             name: d["Name (Latin)"],
             gender: d["Gender"]
@@ -32,7 +34,7 @@ Promise.all([
         };
     })
     histogram.data = flights;
-    console.log(flights);
+    histogram.dogData = dogsRaw;
     histogram.update();
 })
 

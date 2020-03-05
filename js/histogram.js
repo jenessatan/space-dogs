@@ -58,10 +58,14 @@ class Histogram {
   drawLegend() {
     let vis = this;
     let legend = d3.select("#legend").append("g");
-    let altLegend = legend.append("g").attr("class", "altitude-legend")
-      .attr('transform', 'translate(60, 0)');
-    let outcomeLegend = legend.append("g").attr("class", "outcome-legend")
-      .attr('transform', 'translate(150,0)');
+    let altLegend = legend
+      .append("g")
+      .attr("class", "altitude-legend")
+      .attr("transform", "translate(60, 0)");
+    let outcomeLegend = legend
+      .append("g")
+      .attr("class", "outcome-legend")
+      .attr("transform", "translate(150,0)");
     let altitudes = ["unknown", "100", "212", "451", "orbital"];
     let outcomes = ["safe", "part-safe", "died"];
     legend.attr("font-family", "Quicksand");
@@ -81,18 +85,18 @@ class Histogram {
         else if (d == "part-safe") return "img/spaceship-part-safe.svg";
         else return "img/spaceship-crash.svg";
       })
-      .attr("x", (d, i) => 540 + (i * 200))
+      .attr("x", (d, i) => 540 + i * 200)
       .attr("y", 30)
       .attr("height", "80px")
-      .attr("width", "80px")
+      .attr("width", "80px");
 
     outcomeLegend
       .selectAll("iconLabel")
       .data(outcomes)
       .enter()
       .append("text")
-      .attr('text-anchor', 'middle')
-      .attr("x", (d, i) => 580 + (i * 200))
+      .attr("text-anchor", "middle")
+      .attr("x", (d, i) => 580 + i * 200)
       .attr("y", 100 /* (d, i) => 70 + i * 60 */)
       .text(d => {
         if (d == "safe") return "recovered safely";
@@ -116,18 +120,18 @@ class Histogram {
       .data(altitudes)
       .enter()
       .append("circle")
-      .attr("cx", (d, i) => 50 + (i * 85))
+      .attr("cx", (d, i) => 50 + i * 85)
       .attr("cy", 70)
       .attr("r", 15)
       .style("fill", d => vis.colour(d))
       .style("stroke", "black")
-      .style('stroke-width', 0.5);
+      .style("stroke-width", 0.5);
     altLegend
       .selectAll("altlabels")
       .data(altitudes)
       .enter()
       .append("text")
-      .attr("x", (d, i) => 50 + (i * 85))
+      .attr("x", (d, i) => 50 + i * 85)
       .attr("y", 100)
       .style("fill", "black")
       .text(d => {
@@ -144,7 +148,7 @@ class Histogram {
       .style("font-size", "25px")
       .style("font-weight", "bold")
       .attr("alignment-baseline", "middle")
-      .attr('text-anchor', 'middle');
+      .attr("text-anchor", "middle");
   }
 
   update() {
@@ -175,14 +179,15 @@ class Histogram {
       .append("g")
       .attr("transform", "translate(0," + vis.height + ")")
       .call(d3.axisBottom(vis.xScale).ticks(17));
-    
-    axis.append('text')
-      .text('Year')
-      .attr('font-family', 'Quicksand')
-      .attr('transform', 'translate(600, 40)')
-      .attr('font-size', '20px')
-      .attr('font-weight', 'bold')
-      .attr('fill', 'black');
+
+    axis
+      .append("text")
+      .text("Year")
+      .attr("font-family", "Quicksand")
+      .attr("transform", "translate(600, 40)")
+      .attr("font-size", "20px")
+      .attr("font-weight", "bold")
+      .attr("fill", "black");
 
     vis.binContainer = vis.chart.selectAll(".bin-container").data(vis.histData);
     vis.binContainerEnter = vis.binContainer
@@ -287,17 +292,32 @@ class Histogram {
       });
   }
 
+  onclick(d) {
+    let current = d3.selectAll("selected");
+    if (!d3.select(this).classed("selected")) {
+      current.classed("selected", false);
+      current.transition().attr("fill", "black");
+      d3.select(this).classed("selected", true);
+      d3.select(this)
+        .transition()
+        .attr("fill", "red");
+    } else {
+      d3.select(this).classed("selected", false);
+      d3.select(this)
+        .transition()
+        .attr("fill", "black");
+    }
+  }
+
   mouseover(d) {
     let circle = d3.select(this);
     circle.attr("stroke", "tomato").attr("stroke-width", 3);
     let tooltip = d3.select(".tooltip");
-    tooltip
-      .style("visibility", "visible")
-      .html(
-        `<p><span style='font-weight: bold; color: teal'>Onboard: </span>${d.data.dogs}</p>
+    tooltip.style("visibility", "visible").html(
+      `<p><span style='font-weight: bold; color: teal'>Onboard: </span>${d.data.dogs}</p>
         <p><span style='font-weight: bold; color: teal'>Rocket: </span> ${d.data.rocket}</p>
         <p><span style='font-weight: bold; color: teal'>Outcome: </span> ${d.data.result}</p>`
-      );
+    );
   }
 
   mousemove(d) {
