@@ -2,12 +2,12 @@ class Histogram {
   constructor(_config) {
     this.config = {
       parentElement: _config.parentElement,
-      containerWidth: _config.containerWidth || 1200,
-      containerHeight: _config.containerHeight || 400
+      containerWidth: _config.containerWidth || 1300,
+      containerHeight: _config.containerHeight || 420
     };
     this.config.margin = _config.margin || {
       top: 10,
-      bottom: 25,
+      bottom: 45,
       right: 10,
       left: 30
     };
@@ -58,8 +58,10 @@ class Histogram {
   drawLegend() {
     let vis = this;
     let legend = d3.select("#legend").append("g");
-    let altLegend = legend.append("g").attr("class", "altitude-legend");
-    let outcomeLegend = legend.append("g").attr("class", "outcome-legend");
+    let altLegend = legend.append("g").attr("class", "altitude-legend")
+      .attr('transform', 'translate(60, 0)');
+    let outcomeLegend = legend.append("g").attr("class", "outcome-legend")
+      .attr('transform', 'translate(150,0)');
     let altitudes = ["unknown", "100", "212", "451", "orbital"];
     let outcomes = ["safe", "part-safe", "died"];
     legend.attr("font-family", "Quicksand");
@@ -79,27 +81,28 @@ class Histogram {
         else if (d == "part-safe") return "img/spaceship-part-safe.svg";
         else return "img/spaceship-crash.svg";
       })
-      .attr("x", 500)
-      .attr("y", (d, i) => 40 + i * 60)
-      .attr("height", "60px")
-      .attr("width", "60px");
+      .attr("x", (d, i) => 540 + (i * 200))
+      .attr("y", 30)
+      .attr("height", "80px")
+      .attr("width", "80px")
+
     outcomeLegend
       .selectAll("iconLabel")
       .data(outcomes)
       .enter()
       .append("text")
-      .attr("x", 560)
-      .attr("y", (d, i) => 70 + i * 60)
+      .attr('text-anchor', 'middle')
+      .attr("x", (d, i) => 580 + (i * 200))
+      .attr("y", 100 /* (d, i) => 70 + i * 60 */)
       .text(d => {
         if (d == "safe") return "recovered safely";
         else if (d == "part-safe") return "recovered but with fatality";
         else return "failed with fatality";
       })
-      .attr("text-anchor", "left")
       .style("alignment-baseline", "middle");
     outcomeLegend
       .append("text")
-      .attr("x", 500)
+      .attr("x", 675)
       .attr("y", 30)
       .text("Mission Outcome")
       .style("font-size", "25px")
@@ -113,38 +116,40 @@ class Histogram {
       .data(altitudes)
       .enter()
       .append("circle")
-      .attr("cx", 100)
-      .attr("cy", (d, i) => 70 + i * 40)
-      .attr("r", 10)
+      .attr("cx", (d, i) => 50 + (i * 85))
+      .attr("cy", 70)
+      .attr("r", 15)
       .style("fill", d => vis.colour(d))
-      .style("stroke", "black");
+      .style("stroke", "black")
+      .style('stroke-width', 0.5);
     altLegend
       .selectAll("altlabels")
       .data(altitudes)
       .enter()
       .append("text")
-      .attr("x", 120)
-      .attr("y", (d, i) => 70 + i * 40)
+      .attr("x", (d, i) => 50 + (i * 85))
+      .attr("y", 100)
       .style("fill", "black")
       .text(d => {
         if (d == "unknown" || d == "orbital") return d;
         else return d + " km";
       })
-      .attr("text-anchor", "left")
+      .attr("text-anchor", "middle")
       .style("alignment-baseline", "middle");
     altLegend
       .append("text")
-      .attr("x", 90)
+      .attr("x", 225)
       .attr("y", 30)
       .text("Altitude")
       .style("font-size", "25px")
       .style("font-weight", "bold")
-      .attr("alignment-baseline", "middle");
+      .attr("alignment-baseline", "middle")
+      .attr('text-anchor', 'middle');
   }
 
   update() {
     let vis = this;
-    let yearExtent = d3.extent(vis.data, d => d.Date);
+    let yearExtent = d3.extent(vis.data, d => d.date);
 
     let yearBins = d3.timeYears(
       d3.timeYear.offset(yearExtent[0], -1),
@@ -154,7 +159,7 @@ class Histogram {
 
     let binByYear = d3
       .histogram()
-      .value(d => d.Date)
+      .value(d => d.date)
       .thresholds(yearBins);
 
     vis.histData = binByYear(vis.data);
@@ -166,10 +171,18 @@ class Histogram {
   render() {
     let vis = this;
 
-    vis.chart
+    let axis = vis.chart
       .append("g")
       .attr("transform", "translate(0," + vis.height + ")")
       .call(d3.axisBottom(vis.xScale).ticks(17));
+    
+    axis.append('text')
+      .text('Year')
+      .attr('font-family', 'Quicksand')
+      .attr('transform', 'translate(600, 40)')
+      .attr('font-size', '20px')
+      .attr('font-weight', 'bold')
+      .attr('fill', 'black');
 
     vis.binContainer = vis.chart.selectAll(".bin-container").data(vis.histData);
     vis.binContainerEnter = vis.binContainer
@@ -238,8 +251,8 @@ class Histogram {
       .merge(iconsEnter)
       .attr("class", "icon")
       .attr("xlink:href", d => {
-        if (d.data.Outcome == "safe") return "img/spaceship.svg";
-        else if (d.data.Outcome == "part-safe")
+        if (d.data.outcome == "safe") return "img/spaceship.svg";
+        else if (d.data.outcome == "part-safe")
           return "img/spaceship-part-safe.svg";
         else return "img/spaceship-crash.svg";
       })
@@ -270,7 +283,7 @@ class Histogram {
       .attr("cy", d => -d.idx * 2 * d.radius + 23)
       .attr("r", d => d.radius)
       .attr("fill", d => {
-        return vis.colour(d.data.Altitude);
+        return vis.colour(d.data.altitude);
       });
   }
 
@@ -281,9 +294,9 @@ class Histogram {
     tooltip
       .style("visibility", "visible")
       .html(
-        `<p><span style='font-weight: bold; color: teal'>Onboard: </span>${d.data.Dogs}</p>
-        <p><span style='font-weight: bold; color: teal'>Rocket: </span> ${d.data.Rocket}</p>
-        <p><span style='font-weight: bold; color: teal'>Outcome: </span> ${d.data.Result}</p>`
+        `<p><span style='font-weight: bold; color: teal'>Onboard: </span>${d.data.dogs}</p>
+        <p><span style='font-weight: bold; color: teal'>Rocket: </span> ${d.data.rocket}</p>
+        <p><span style='font-weight: bold; color: teal'>Outcome: </span> ${d.data.result}</p>`
       );
   }
 

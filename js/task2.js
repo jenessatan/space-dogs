@@ -1,26 +1,38 @@
 // To-do: task 2
 let histogram = new Histogram({ parentElement: '#flights' });
 
-// Promise.all([
-//     d3.csv('data/Flights-Database.csv'),
-//     d3.csv('data/Dogs-Database.csv')
-// ]).then(files => {
-//     let flights = files[0];
-//     let dogs = files[1];
-// })
+Promise.all([
+    d3.csv('data/Flights-Database.csv'),
+    d3.csv('data/Dogs-Database.csv')
+]).then(files => {
+    let flightsRaw = files[0];
+    let dogsRaw = files[1];
 
-d3.csv('data/Flights-Database.csv').then(data => {
-    // console.log(data);
     let parser = d3.timeParse("%Y-%m-%d");
-    data.forEach(d => {
-        d.Date = parser(d.Date);
-        d.Outcome = processResult(d.Result);
-        d.Altitude = processAltitude(d['Altitude (km)']);
+
+    let dogs = {};
+    dogsRaw.forEach(d => {
+        dogs[d["Name (Latin)"]] = {
+            name: d["Name (Latin)"],
+            gender: d["Gender"]
+        }
+    });
+
+    let flights = flightsRaw.map(f => {
+        let dogsOnFlight = f["Dogs"].split(",");
+        let dogsResult = dogsOnFlight.map(str => dogs[str]);
+        return {
+            date: parser(f.Date),
+            outcome: processResult(f.Result),
+            altitude: processAltitude(f['Altitude (km)']),
+            result: f.Result,
+            rocket: f.Rocket,
+            dogsArr: dogsResult,
+            dogs: f.Dogs
+        };
     })
-
-    console.log(data);
-
-    histogram.data = data;
+    histogram.data = flights;
+    console.log(flights);
     histogram.update();
 })
 
